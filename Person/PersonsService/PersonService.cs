@@ -1,34 +1,35 @@
 ﻿namespace Person.PersonsService;
+
+using Microsoft.EntityFrameworkCore;
+using Person.Database;
 using Person.Models.Persons;
 
 public class PersonService
 {
-    private readonly Dictionary<Guid, Person> _peopleDic;
+    private readonly ApplicationDbContext _context;
 
-    public PersonService()
+    public PersonService(ApplicationDbContext context)
     {
-        Person seedPerson = new(Guid.NewGuid(), "test", "Person", "Tester");
-        _peopleDic = new()
-        {
-            {seedPerson.Id, seedPerson }
+        _context = context;
+    }
 
-            };
-        }
     public bool Create(CreatePersonDto personDto)
     {
         Person person = new(Guid.NewGuid(), personDto.FirstName, personDto.LastName, personDto.JobTitle);
-        return _peopleDic.TryAdd(person.Id, person);
+        _context.People.Add(person);
+        int rowsAffected = _context.SaveChanges();
+        return rowsAffected > 0;
     }
 
     public Person? GetPersonById(Guid id)
     {
-        _peopleDic.TryGetValue(id, out Person? person);
+        Person? person = _context.People.Where(p => p.Id == id).FirstOrDefault();
         return person;
     }
 
     public Person[] GetAllPeople()
     {
-        return _peopleDic.Values.ToArray();
+        return _context.People.ToArray();
     }
 
     public bool Edit(EditPersonDto personDto)
@@ -37,18 +38,20 @@ public class PersonService
         if (person is null)
         {
             return false;
-        } 
+        }
 
         person.FirstName = personDto.FirstName;
         person.LastName = personDto.LastName;
         person.JobTitle = personDto.JobTitle;
 
-        return true;
+        int rowsAffected = _context.SaveChanges();
+        return rowsAffected > 0;
     }
 
     public bool Delete(Guid id)
     {
-        return _peopleDic.Remove(id);
+        int rowsAffected = _context.People.Where(p => p.Id == id).ExecuteDelete();
+        return rowsAffected > 0;
     }
 }
 
