@@ -1,0 +1,40 @@
+﻿@using Person.Models.Persons
+
+@model Person[]
+
+@{
+    ViewData["Title"] = "person";
+}
+
+<h1>People</h1>
+
+@if (TempData.TryGetValue("SuccessMessage", out object? message))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @message?.ToString()
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<a class="btn btn-primary" asp-controller="Person" asp-action="Create">Create Person</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Job Title</th>
+            <th>Option</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        @foreach(Person person in Model)
+        {
+            <tr>
+                <td>@person.FirstName @person.LastName</td>
+                <td>@person.JobTitle</td>
+                <td><a asp-action="Edit" asp-route-id="@person.Id" class="btn btn-primary">Edit Person</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
